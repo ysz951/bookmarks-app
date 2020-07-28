@@ -54,7 +54,10 @@ class App extends Component {
     })
       .then(res => {
         if (!res.ok) {
-          return res.json().then(error => Promise.reject(error))
+          return res.text().then(message => {
+            throw new Error(message)
+          });
+          // return res.json().then(error => Promise.reject(error))
         }
         return res.json()
       })
@@ -91,7 +94,11 @@ class App extends Component {
             />
             <Route
               path='/edit/:bookmarkId'
-              component={EditBookmark}
+              render={(routerProps) => 
+              <EditBookmark 
+                bookmarkId = {routerProps.match.params.bookmarkId} 
+                history={routerProps.history}
+              />}
             />
           </div>
         </BookmarksContext.Provider>

@@ -43,7 +43,10 @@ class AddBookmark extends Component {
     })
       .then(res => {
         if (!res.ok) {
-          return res.json().then(error => Promise.reject(error))
+          return res.text().then(message => {
+            throw new Error(message)
+          });
+          // return res.json().then(error => Promise.reject(error))
         }
         return res.json()
       })

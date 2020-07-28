@@ -1,10 +1,17 @@
 import React, { Component } from  'react';
+import PropTypes from 'prop-types';
 import config from '../config';
 import BookmarksContext from '../BookmarksContext';
+
 const Required = () => (
     <span className='AddBookmark__required'>*</span>
 )
 class EditBookmark extends Component {
+  static propTypes = {
+    history: PropTypes.shape({
+      push: PropTypes.func,
+    }).isRequired,
+  };
   state = {
     id: null,
     title: "",
@@ -16,7 +23,7 @@ class EditBookmark extends Component {
 
   static contextType = BookmarksContext;
   componentDidMount() {
-    const bookmarkLink = `${config.API_ENDPOINT}/${this.props.match.params.bookmarkId}`
+    const bookmarkLink = `${config.API_ENDPOINT}/${this.props.bookmarkId}`
     this.setState({ error: null })
     fetch(bookmarkLink, {
       method: 'GET',
@@ -27,7 +34,10 @@ class EditBookmark extends Component {
     })
       .then(res => {
         if (!res.ok) {
-          return res.json().then(error => Promise.reject(error))
+          return res.text().then(message => {
+            throw new Error(message)
+          });
+          // return res.json().then(error => Promise.reject(error))
         }
         return res.json()
       })
@@ -46,7 +56,7 @@ class EditBookmark extends Component {
   };
   handleSubmit = e => {
     e.preventDefault()
-    const bookmarkLink = `${config.API_ENDPOINT}/${this.props.match.params.bookmarkId}`
+    const bookmarkLink = `${config.API_ENDPOINT}/${this.props.bookmarkId}`
     const { title, url, description, rating } = e.target
     const bookmark = {
       title: title.value,
@@ -55,7 +65,7 @@ class EditBookmark extends Component {
       rating: rating.value,
     }
     const newBookmark = {
-      id: Number(this.props.match.params.bookmarkId),
+      id: Number(this.props.bookmarkId),
       title: title.value,
       url: url.value,
       description: description.value,
@@ -72,7 +82,10 @@ class EditBookmark extends Component {
     })
       .then(res => {
         if (!res.ok) {
-          return res.json().then(error => Promise.reject(error))
+          return res.text().then(message => {
+            throw new Error(message)
+          });
+          // return res.json().then(error => Promise.reject(error))
         }
       })
       .then(data => {
@@ -94,7 +107,7 @@ class EditBookmark extends Component {
     // console.log(this.context.addBookmark)
     return (
       <section className='EditArticleForm'>
-        <h2>Edit article</h2>
+        <h2>Edit bookmark</h2>
         <form
           className='AddBookmark__form'
           onSubmit={this.handleSubmit}
@@ -164,7 +177,7 @@ class EditBookmark extends Component {
             </button>
             {' '}
             <button type='submit'>
-              Save
+              Update
             </button>
           </div>
         </form>
