@@ -1,29 +1,52 @@
 import React, { Component } from  'react';
-import PropTypes from 'prop-types';
+import config from '../config';
 import BookmarksContext from '../BookmarksContext';
-import config from '../config'
-import './AddBookmark.css';
-
 const Required = () => (
-  <span className='AddBookmark__required'>*</span>
+    <span className='AddBookmark__required'>*</span>
 )
-
-class AddBookmark extends Component {
-  static propTypes = {
-    history: PropTypes.shape({
-      push: PropTypes.func,
-    }).isRequired,
-  };
-
-  static contextType = BookmarksContext;
-
+class EditBookmark extends Component {
   state = {
+    id: null,
+    title: "",
+    url: "",
+    description: null,
+    rating: "",
     error: null,
   };
 
+  static contextType = BookmarksContext;
+  componentDidMount() {
+    const bookmarkLink = `${config.API_ENDPOINT}/${this.props.match.params.bookmarkId}`
+    this.setState({ error: null })
+    fetch(bookmarkLink, {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${config.API_KEY}`
+      }
+    })
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(error => Promise.reject(error))
+        }
+        return res.json()
+      })
+      .then(res => {
+        this.setState({...res})
+      })
+      .catch(error => {
+        console.error(error)
+        this.setState({ error })
+      })
+  }
+
+
+  handleClickCancel = () => {
+    this.props.history.push('/')
+  };
   handleSubmit = e => {
     e.preventDefault()
-    // get the form fields from the event
+    const bookmarkLink = `${config.API_ENDPOINT}/${this.props.match.params.bookmarkId}`
     const { title, url, description, rating } = e.target
     const bookmark = {
       title: title.value,
@@ -31,10 +54,16 @@ class AddBookmark extends Component {
       description: description.value,
       rating: rating.value,
     }
-    console.log(bookmark)
+    const newBookmark = {
+      id: Number(this.props.match.params.bookmarkId),
+      title: title.value,
+      url: url.value,
+      description: description.value,
+      rating: Number(rating.value),
+    }
     this.setState({ error: null })
-    fetch(config.API_ENDPOINT, {
-      method: 'POST',
+    fetch(bookmarkLink, {
+      method: 'PATCH',
       body: JSON.stringify(bookmark),
       headers: {
         'content-type': 'application/json',
@@ -45,15 +74,14 @@ class AddBookmark extends Component {
         if (!res.ok) {
           return res.json().then(error => Promise.reject(error))
         }
-        return res.json()
       })
       .then(data => {
         title.value = ''
         url.value = ''
         description.value = ''
         rating.value = ''
-        console.log('data',data)
-        this.context.addBookmark(data)
+        // console.log(newBookmark)
+        this.context.updateBookmark(newBookmark)
         this.props.history.push('/')
       })
       .catch(error => {
@@ -61,16 +89,12 @@ class AddBookmark extends Component {
         this.setState({ error })
       })
   }
-
-  handleClickCancel = () => {
-    this.props.history.push('/')
-  };
-
   render() {
-    const { error } = this.state
+    const { id, title, url, description, rating, error } = this.state
+    // console.log(this.context.addBookmark)
     return (
-      <section className='AddBookmark'>
-        <h2>Create a bookmark</h2>
+      <section className='EditArticleForm'>
+        <h2>Edit article</h2>
         <form
           className='AddBookmark__form'
           onSubmit={this.handleSubmit}
@@ -89,6 +113,7 @@ class AddBookmark extends Component {
               name='title'
               id='title'
               placeholder='Great website!'
+              defaultValue = {title}
               required
             />
           </div>
@@ -103,6 +128,7 @@ class AddBookmark extends Component {
               name='url'
               id='url'
               placeholder='https://www.great-website.com/'
+              defaultValue = {url}
               required
             />
           </div>
@@ -110,10 +136,11 @@ class AddBookmark extends Component {
             <label htmlFor='description'>
               Description
             </label>
-            <textarea
+            {id ? (<textarea
               name='description'
               id='description'
-            />
+              defaultValue = {description}
+            />) : null}
           </div>
           <div>
             <label htmlFor='rating'>
@@ -125,7 +152,7 @@ class AddBookmark extends Component {
               type='number'
               name='rating'
               id='rating'
-              defaultValue='1'
+              defaultValue={rating.toString()}
               min='1'
               max='5'
               required
@@ -142,8 +169,8 @@ class AddBookmark extends Component {
           </div>
         </form>
       </section>
-    );
+    )
   }
 }
 
-export default AddBookmark;
+export default EditBookmark;

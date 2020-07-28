@@ -28,5 +28,7 @@
 
 .BookmarkItem__buttons {
   font-size: .8em;
-  text-align: right;
+  display: flex;
+  justify-content: space-between;
+  /* text-align: left; */
 }
