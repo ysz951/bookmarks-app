@@ -62,7 +62,6 @@ class App extends Component {
         return res.json()
       })
       .then(bookmarks => {
-        console.log(bookmarks)
         this.setBookmarks(bookmarks)})
       .catch(error => {
         console.error(error)
