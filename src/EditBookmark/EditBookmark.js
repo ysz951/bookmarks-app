@@ -89,6 +89,7 @@ class EditBookmark extends Component {
         }
       })
       .then(data => {
+        // console.log(data)
         title.value = ''
         url.value = ''
         description.value = ''

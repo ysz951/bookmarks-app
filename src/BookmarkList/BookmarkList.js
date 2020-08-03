@@ -21,12 +21,14 @@ class BookmarkList extends Component {
 
   render() {
     const { bookmarks } = this.context
+    // console.log(this.props.history)
     return (
       <section className='BookmarkList'>
         <h2>Your bookmarks</h2>
         <ul className='BookmarkList__list' aria-live='polite'>
           {bookmarks.map(bookmark =>
             <BookmarkItem
+              history = {this.props.history}
               key={bookmark.id}
               {...bookmark}
             />
